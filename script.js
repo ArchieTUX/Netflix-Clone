@@ -1,68 +1,60 @@
-// Hover Effect for Movie Cards with Animation
-const movieCards = document.querySelectorAll('.movie-card');
+// Your TMDb API key
+const apiKey = '368ca54893cd7c85219eddeb742c5a9d';
 
-// Add hover effect to each movie card with smooth scaling
-movieCards.forEach(card => {
-    card.addEventListener('mouseenter', () => {
-        card.querySelector('img').style.transform = 'scale(1.1)';
-        card.style.transition = 'transform 0.3s ease';
-    });
+// URL for fetching popular movies
+const apiUrl = `https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}&language=en-US&page=1`;
 
-    card.addEventListener('mouseleave', () => {
-        card.querySelector('img').style.transform = 'scale(1)';
-        card.style.transition = 'transform 0.3s ease';
-    });
-});
+// Function to fetch and display movies
+function fetchMovies() {
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      const movies = data.results;
+      const movieContainer = document.querySelector('.movie-container');
+      movieContainer.innerHTML = ''; // Clear the container before adding new content
 
-// Simple Modal functionality for movie details (click to open)
-const movieCardsWithDetails = document.querySelectorAll('.movie-card');
-const modal = document.createElement('div');
-modal.classList.add('modal');
-modal.innerHTML = `
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2 class="movie-title">Movie Title</h2>
-        <p class="movie-description">This is where the movie description will go.</p>
-        <button class="btn btn-primary">Watch Now</button>
-    </div>
-`;
-document.body.appendChild(modal);
+      movies.forEach(movie => {
+        // Create a movie card
+        const movieCard = document.createElement('div');
+        movieCard.classList.add('movie-card');
 
-// Open modal when a movie card is clicked with smooth fade-in animation
-movieCardsWithDetails.forEach(card => {
-    card.addEventListener('click', () => {
-        const title = card.querySelector('.movie-title').innerText;
-        const description = "This is a sample description for the movie. Add actual movie data here.";
-        
-        modal.querySelector('.movie-title').innerText = title;
-        modal.querySelector('.movie-description').innerText = description;
+        // Create the image element for the movie poster
+        const moviePoster = document.createElement('img');
+        moviePoster.src = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+        moviePoster.alt = movie.title;
 
-        modal.style.display = 'block';
-        setTimeout(() => {
-            modal.classList.add('fade-in');
-        }, 10); // Ensures the fade-in class gets applied after the modal is shown
-    });
-});
+        // Create the title element
+        const movieTitle = document.createElement('h3');
+        movieTitle.textContent = movie.title;
 
-// Close modal when clicking the close button with smooth fade-out animation
-const closeModal = modal.querySelector('.close-btn');
-closeModal.addEventListener('click', () => {
-    modal.classList.remove('fade-in');
-    modal.classList.add('fade-out');
-    setTimeout(() => {
-        modal.style.display = 'none';
-        modal.classList.remove('fade-out');
-    }, 300); // Matches the fade-out duration
-});
+        // Create the overview (description) element
+        const movieOverview = document.createElement('p');
+        movieOverview.textContent = movie.overview.length > 100 ? movie.overview.substring(0, 100) + '...' : movie.overview;
 
-// Close modal when clicking outside the modal content
-window.addEventListener('click', (e) => {
-    if (e.target === modal) {
-        modal.classList.remove('fade-in');
-        modal.classList.add('fade-out');
-        setTimeout(() => {
-            modal.style.display = 'none';
-            modal.classList.remove('fade-out');
-        }, 300);
-    }
+        // Create a "Watch Now" button
+        const watchButton = document.createElement('button');
+        watchButton.classList.add('watch-button');
+        watchButton.textContent = 'Watch Now';
+
+        // Append the elements to the movie card
+        movieCard.appendChild(moviePoster);
+        movieCard.appendChild(movieTitle);
+        movieCard.appendChild(movieOverview);
+        movieCard.appendChild(watchButton);
+
+        // Append the movie card to the container
+        movieContainer.appendChild(movieCard);
+      });
+    })
+    .catch(error => console.error('Error fetching movie data:', error));
+}
+
+// Call the function to fetch movies when the page loads
+window.onload = fetchMovies;
+
+// Optional: Add event listener for "Watch Now" buttons
+document.addEventListener('click', function(event) {
+  if (event.target.classList.contains('watch-button')) {
+    alert('Feature coming soon!');
+  }
 });
